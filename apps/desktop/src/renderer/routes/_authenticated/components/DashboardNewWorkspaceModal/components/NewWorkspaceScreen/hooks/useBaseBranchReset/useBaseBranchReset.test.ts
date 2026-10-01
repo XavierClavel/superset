@@ -84,3 +84,26 @@ test("keeps a branch picked while open, and resets it on a project change", () =
 	});
 	expect(result.current).toEqual({ baseBranch: null, baseBranchSource: null });
 });
+
+test("re-seeds the project's saved base when the host changes", () => {
+	useV2WorkspaceCreateDefaultsStore
+		.getState()
+		.setBaseBranchDefault("cooknco", "release", "remote-tracking");
+	useNewWorkspaceDraftStore.getState().selectProject("cooknco");
+	const { result } = renderBaseBranch();
+
+	act(() => {
+		useNewWorkspaceDraftStore
+			.getState()
+			.updateDraft({ baseBranch: "hotfix", baseBranchSource: "local" });
+	});
+	expect(result.current.baseBranch).toBe("hotfix");
+
+	act(() => {
+		useNewWorkspaceDraftStore.getState().updateDraft({ hostId: "other-host" });
+	});
+	expect(result.current).toEqual({
+		baseBranch: "release",
+		baseBranchSource: "remote-tracking",
+	});
+});
