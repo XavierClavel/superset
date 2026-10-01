@@ -65,19 +65,19 @@ test("applies the project's saved base when it mounts", () => {
 	});
 });
 
-test("keeps a branch picked while open, and resets it on a project change", () => {
+test("keeps the draft's base while open, and resets it on a project change", () => {
 	useNewWorkspaceDraftStore.getState().selectProject("padel-manager");
 	const { result } = renderBaseBranch();
 
 	act(() => {
+		useNewWorkspaceDraftStore
+			.getState()
+			.updateDraft({ baseBranch: "hotfix", baseBranchSource: "local" });
 		useV2WorkspaceCreateDefaultsStore
 			.getState()
 			.setBaseBranchDefault("padel-manager", "staging", "local");
-		useNewWorkspaceDraftStore
-			.getState()
-			.updateDraft({ baseBranch: "staging", baseBranchSource: "local" });
 	});
-	expect(result.current.baseBranch).toBe("staging");
+	expect(result.current.baseBranch).toBe("hotfix");
 
 	act(() => {
 		useNewWorkspaceDraftStore.getState().selectProject("superset");
